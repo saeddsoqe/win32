@@ -109,8 +109,25 @@
 //notes for this function
 //Os_Terminate_Flage is a variable type bool in openosek its defined globally in os_startos.c
 //intptr_t is => typedef int intptr_t;
-pthread_t   ;
-void* osEE_x86_64_system_timer_init(void *pThread_Arg)
+pthread_t   TimerThread;
+void osEE_x86_64_system_timer_init(void)
+{
+  int rt_error;
+  rt_error = pthread_create(&TimerThread, NULL,osEE_x86_64_system_timer_thread, NULL);
+  
+  if(rt_error!=0)
+  {
+    printf("ERROR CREATING THREAD!\n");
+    exit(-1);
+  }
+  else
+  {
+    /* Do nothing here */
+  }
+  
+} 
+
+void* osEE_x86_64_system_timer_thread(void *pThread_Arg)
 {
    struct timespec rqtp;
    uint8 interrupt;
