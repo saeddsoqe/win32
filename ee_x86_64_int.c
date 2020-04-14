@@ -61,16 +61,14 @@ typedef uint32_t OsEE_IntFlag_Type;
 OsEE_IntFlag_Type OsEE_Win32_IntFlags;
 
 /* interrupt interrupt flags buffer */
-typedef uint32_t OsEE_IntFlagBuffer_Type;
-OsEE_IntFlagBuffer_Type OsEE_Win32_IntFlagsBuffer;
+OsEE_IntFlag_Type OsEE_Win32_IntFlagsBuffer;
 
 /* interrupt status */
 typedef unsigned char OsEE_IntState_Type;
 OsEE_IntState_Type OsEE_Win32_IntState;
 
 /* interrupt mask type */
-typedef uint32_t OsEE_IntMask_Type;
-OsEE_IntMask_Type OsEE_Win32_IntMask;
+OsEE_IntFlag_Type OsEE_Win32_IntMask;
 
 /* interrupt index type */
 typedef unsigned char OsEE_Win32_IntIndex_Type;
@@ -152,4 +150,49 @@ static OsEE_Win32_IntIndex_Type Win32_GetFirstISR(void)
 
    return ret;
 }
+	
 /* schedule buffered interrupts */
+extern void Win32_ScheduleBuffered_interrupt(void)
+{
+   int iterator = 0;
+   uint32 ReadyInterrupt;
+
+   if (OsEE_Win32_IntState) 
+   {
+      ReadyInterrupt = ( OsEE_Win32_IntFlagsBuffer & ( (OsEE_IntFlag_Type) ~OsEE_Win32_IntMask ) );
+      while(ReadyInterrupt != 0)
+      {
+         if (ReadyInterrupt & 1)
+         {
+            OsEE_Win32_IntFlagsBuffer &= ~(1<<iterator);
+
+            //InterruptTable[iterator](); /* to be renamed */
+         }
+
+         ReadyInterrupt >>= 1;
+         iterator++;
+      }
+   }
+}	
+	
+/* start OS arch component */
+	FUNC(OsEE_bool, OS_CODE) osEE_cpu_startos(void)
+{
+  OsEE_bool const continue_startos = osEE_std_cpu_startos();
+
+#if (!defined(OSEE_API_DYNAMIC))
+  if (continue_startos == OSEE_TRUE) {
+/* Initialize ISRs of this core */
+	  signal(SIGALRM,OsEE_Win32_InterruptHandler);
+	  signal(SIGTERM,OsEE_Win32_InterruptHandler);
+	  signal(SIGUSR1,OsEE_Win32_InterruptHandler);
+	  /* to be implemented agter mplementing the vector table */
+      }
+    }
+#if (defined(OSEE_HAS_SYSTEM_TIMER))
+    osEE_Win32_system_timer_init();
+#endif /* OSEE_HAS_SYSTEM_TIMER */
+  }
+#endif /* !OSEE_API_DYNAMIC */
+  return continue_startos;
+}
