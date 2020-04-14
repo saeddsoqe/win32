@@ -73,6 +73,37 @@ extern "C" {
 /*==============================================================================
                                   Macros
  =============================================================================*/
+  
+#define OSEE_WIN32_INTERRUPTS_NO	32
+/*==============================================================================
+                                  Typedefs
+ =============================================================================*/
+/* interrupt inital flag */
+typedef uint32_t OsEE_IntFlag_Type;
+  /* interrupt status */
+typedef unsigned char OsEE_IntState_Type;
+  /* interrupt index type */
+typedef unsigned char OsEE_Win32_IntIndex_Type;
+  typedef enum
+{
+	WIN_32_FLSE,
+	WIN_32_TRUE
+}OsEE_Win32_Bool;
+  
+/*==============================================================================
+                                  External data
+ =============================================================================*/
+extern OsEE_IntFlag_Type OsEE_Win32_IntFlags;
+
+/* interrupt interrupt flags buffer */
+extern OsEE_IntFlag_Type OsEE_Win32_IntFlagsBuffer;
+
+
+extern OsEE_IntState_Type OsEE_Win32_IntState;
+
+/* interrupt mask type */
+extern OsEE_IntFlag_Type OsEE_Win32_IntMask;
+
 
 
 /*==============================================================================
@@ -81,49 +112,44 @@ extern "C" {
 
 OSEE_STATIC_INLINE OsEE_bool osEE_hal_is_enabledIRQ( void )
 {
-  OsEE_reg flags;
-  __asm__ volatile("pushf   \n\t");
-  __asm__ volatile("pop %0  \n\t" : "=g"(flags));
-  return ((OsEE_bool)(flags & 0x200));
+  return OsEE_Win32_IntState;
 }
 
 /* Disable/Enable Interrupts */
 OSEE_STATIC_INLINE void osEE_hal_disableIRQ( void )
 {
-  asm volatile("cli" : : : "memory");
+  OsEE_Win32_IntState = (0U);
 }
 
 OSEE_STATIC_INLINE void osEE_hal_enableIRQ( void )
 {
-  asm volatile("sti" : : : "memory");
+  OsEE_Win32_IntState = (1U);
+  Win32_ScheduleBuffered_interrupt
 }
 
 /* Suspend/Resume Interrupts */
 OSEE_STATIC_INLINE OsEE_reg osEE_hal_suspendIRQ(void)
 {
-  OsEE_reg flags;
-  __asm__ volatile("pushf   \n\t");
-  __asm__ volatile("pop %0  \n\t" : "=g"(flags));
   osEE_hal_disableIRQ();
-  return flags;
+  return OsEE_Win32_IntFlagsBuffer;
 }
 
 OSEE_STATIC_INLINE void osEE_hal_resumeIRQ(OsEE_reg flags)
 {
-  __asm__ volatile("push %0 \n\t" : : "g"(flags));
-  __asm__ volatile("popf    \n\t");
+  osEE_hal_enableIRQ();
 }
 
 OSEE_STATIC_INLINE void osEE_hal_set_ipl(TaskPrio virt_prio) {
-  (void)virt_prio; /* IPL not supported, yet */
+  //(void)virt_prio; /* IPL not supported, yet */
+  __asm__ volatile("nop");
 }
 
 OSEE_STATIC_INLINE OsEE_reg
   osEE_hal_prepare_ipl(OsEE_reg flags, TaskPrio virt_prio)
 {
   /* IPL not supported, yet */
-  (void)virt_prio;
-  return flags;
+  //(void)virt_prio;
+  return OsEE_Win32_IntFlagsBuffer;
 }
 
 /*==============================================================================
@@ -144,6 +170,7 @@ OSEE_STATIC_INLINE void osEE_hal_end_nested_primitive( OsEE_reg flag )
   osEE_hal_resumeIRQ(flag);
 }
 
+  extern void Win32_ScheduleBuffered_interrupt(void);
 /*==============================================================================
                           Ready Queue utilities
  =============================================================================*/
@@ -169,9 +196,10 @@ OSEE_STATIC_INLINE MemSize osEE_hal_get_msb (OsEE_rq_mask mask) {
 
 
 #if (defined(OSEE_HAS_SYSTEM_TIMER))
-extern void osEE_x86_64_system_timer_init(void);
+extern void osEE_Win32_system_timer_init(void);
 #endif /* OSEE_HAS_SYSTEM_TIMER */
-
+  
+/* to be modified after understanding the tcb */
 OSEE_STATIC_INLINE FUNC(void, OS_CODE)
   osEE_change_context_from_isr2_end
 (
@@ -179,7 +207,6 @@ OSEE_STATIC_INLINE FUNC(void, OS_CODE)
   P2VAR(OsEE_TDB, AUTOMATIC, OS_APPL_CONST) p_to
 )
 {
-  osEE_x86_64_int_send_eoi();
   osEE_change_context_from_task_end(p_from, p_to);
 }
 
