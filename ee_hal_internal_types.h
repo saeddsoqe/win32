@@ -76,7 +76,7 @@ typedef struct OsEE_CTX_tag {
  struct OsEE_CTX_tag * p_ctx;
  OsEE_reg ebx;
  OsEE_reg ebp;
- OsEE_reg flags;
+ //OsEE_reg flags;
 } OsEE_CTX;
 /*============================================================================*/
 /* Stack Control Block: contine le informazioni dinamiche relative allo stack */
