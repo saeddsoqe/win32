@@ -56,37 +56,25 @@
   ==========================================================================*/
 
 .macro osEE_hal_save_ctx_m p_from_scb
-
-/*    pushf /* This decrements rsp by 8 */
-/*    push    %r15 */
-/*    push    %r14 */
-/*    push    %r13 */
-/*    push    %r12 */
     
-    push    %rbp
-    push    %rbx
+    push    %ebp
+    push    %ebx
 
     push    (\p_from_scb) # Save previous TOS on stack
 
-    mov     %rsp, (\p_from_scb) # p_from_scb->p_tos = SP
+    mov     %esp, (\p_from_scb) # p_from_scb->p_tos = SP
 .endm
 
 .macro osEE_hal_restore_ctx_m p_to_scb
 
-    movq  (\p_to_scb), %rsp # SP = p_to_scb->p_tos
+    movl  (\p_to_scb), %esp # SP = p_to_scb->p_tos
 
-/*    pop (\p_to_scb)        *//* Restore previous TOS on SCB */
-/* Restore previous TOS on SCB */
-    pop %rbx
-    mov %rbx, (\p_to_scb)
+    pop %ebx
+    mov %ebx, (\p_to_scb)
 
-    pop %rbx
-    pop %rbp
-/*    pop %r12 */
-/*    pop %r13 */
-/*    pop %r14 */
-/*    pop %r15 */
-/*    popf     */
+    pop %ebx
+    pop %ebp
+
 .endm
 
 /*
@@ -101,10 +89,10 @@ FUNC(void, OS_CODE)
   .globl osEE_hal_save_ctx_and_restore_ctx
   .type osEE_hal_save_ctx_and_restore_ctx, @function
 osEE_hal_save_ctx_and_restore_ctx:
-  /*  %rdi parameter: OsEE_TDB * p_tod_tdb
-      %rsi parameter: OsEE_SCB * p_to_scb
-      %rdx parameter: OsEE_SCB * p_from_scb */
-    osEE_hal_save_ctx_m %rdx
+  /*  %edi parameter: OsEE_TDB * p_tod_tdb
+      %esi parameter: OsEE_SCB * p_to_scb
+      %edx parameter: OsEE_SCB * p_from_scb */
+    osEE_hal_save_ctx_m %edx
 
 /* Unconditional brach to restore context */
     jmp osEE_hal_restore_ctx
@@ -124,7 +112,7 @@ FUNC(void, OS_CODE)
 osEE_hal_restore_ctx:
   /*  %rdi parameter: OsEE_TDB * p_to_tdb
       %rsi parameter: OsEE_SCB * p_to_scb */
-    osEE_hal_restore_ctx_m %rsi
+    osEE_hal_restore_ctx_m %esi
     callq osEE_scheduler_task_wrapper_restore
     ret
   .size osEE_hal_restore_ctx, .-osEE_hal_restore_ctx
@@ -143,7 +131,7 @@ osEE_hal_ready2stacked:
   /*  %rdi parameter:  OsEE_TDB * p_to_tdb
       %rsi parameter:  OsEE_SCB * p_to_scb */
 /* SP = p_to_scb->p_tos */
-    mov (%rsi), %rsp
+    mov (%esi), %esp
     callq osEE_scheduler_task_wrapper_run
   .size osEE_hal_ready2stacked, .-osEE_hal_ready2stacked
 
@@ -162,7 +150,7 @@ osEE_hal_save_ctx_and_ready2stacked:
   /*  %rdi parameter: OsEE_TDB * p_to_tdb
       %rsi parameter: OsEE_SCB * p_to_scb
       %rdx parameter: OsEE_SCB * p_from_scb */
-    osEE_hal_save_ctx_m %rdx
+    osEE_hal_save_ctx_m %edx
     jmp osEE_hal_ready2stacked
   .size osEE_hal_save_ctx_and_ready2stacked, .-osEE_hal_save_ctx_and_ready2stacked
 
@@ -180,8 +168,8 @@ osEE_hal_terminate_ctx:
   /*  %rdi parameter:  OsEE_SCB * p_term_scb
       %rsi parameter:  kernel_cb */
 /* Unwind SP */
-    movq  (%rdi), %rsp
+    movl  (%edi), %esp
 
-    callq *%rsi
+    callq *%esi
 /* This is a NORETURN Function */
   .size osEE_hal_terminate_ctx, .-osEE_hal_terminate_ctx
