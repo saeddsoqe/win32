@@ -55,153 +55,331 @@
 #include "ee_platform_config.h"
 #include <stdio.h>
 
-#define OSEE_WIN32_INTERRUPTS_NO	32
-/* interrupt inital flag */
-typedef uint32_t OsEE_IntFlag_Type;
-OsEE_IntFlag_Type OsEE_Win32_IntFlags;
-
-/* interrupt interrupt flags buffer */
-OsEE_IntFlag_Type OsEE_Win32_IntFlagsBuffer;
+/* pointer to void-void func */
+typedef void (*Handler_Addr_type) (void);
 
 /* interrupt status */
-typedef unsigned char OsEE_IntState_Type;
-OsEE_IntState_Type OsEE_Win32_IntState;
+typedef uint8_t OsEE_Win32_InterruptState_type;
 
-/* interrupt mask type */
-OsEE_IntFlag_Type OsEE_Win32_IntMask;
+OsEE_Win32_InterruptState_type OsEE_Win32_InterruptState = 0;
+ 
+/* category identifier */
 
-/* interrupt index type */
-typedef unsigned char OsEE_Win32_IntIndex_Type;
+typedef enum {
+	OSEE_ISR_CAT_1,
+	OSEE_ISR_CAT_2
+} OSEE_ISR_CAT_type;
 
-typedef enum
-{
-	WIN_32_FLSE,
-	WIN_32_TRUE
-}OsEE_Win32_Bool;
-
+/* vector structure */
 
 typedef struct {
-  uintptr_t isr_hnd;
-  uint8_t   category;
-} OsEE_x86_64_lookup_table;
+	Handler_Addr_type 	ISR_Addr;
+	OSEE_ISR_CAT_type	ISR_CAT;
+}OsEE_Vec_type;
 
-static OsEE_x86_64_lookup_table osEE_isr_task_lookup_table[NUM_IDT_DESC];
+/* Number of interrupts */
+#define OSEE_WIN32_INTERRUPT_NUMBER 32
 
-
-void OsEE_Win32_InterruptHandler(int sig)
+/* default handler */
+void OsEE_Win32_DefaultHandler(void)
 {
-	OsEE_Win32_IntIndex_Type interrupt;
-	/* check incomming signal to terminate */
-   if (SIGTERM == sig)
-   {
-      /* Terminate Child process */
-     
-      /* wait for the second thread to finish */
-      pthread_join(osEE_x86_64_system_timer_thread, NULL);
-      /* kill Main process */
-      
-   }
-	
-	/* check if there is wainting interrupt flags */
-	while( Win32_ISRIsWaiting() )
-   	{
-	  /* get first waiting flag */
-      interrupt = Win32_GetFirstISR();
-
-      /* only 0 .. 31 interrupts are allowed */
-      if (OSEE_WIN32_INTERRUPTS_NO > interrupt)
-      {
-		  /* handle if not masked & interrupt enable */
-         if ((OsEE_Win32_IntState) && ((OsEE_Win32_IntMask & (1 << interrupt ))  == 0 ))
-         {
-            //InterruptTable[interrupt]();
-         }
-         else /* buffer the flag otherwise */
-         {
-            OsEE_Win32_IntFlagsBuffer |= 1 << interrupt;
-         }
-      }
+	/* to be replaced by an error code */
+	printf("WRONG INTERRUPT IDX!\n");
+	while(1);
 }
 
-/* check for wainting nterrupts */
- static OsEE_Win32_Bool Win32_ISRIsWaiting(void)
- {
-	 if(0 != OsEE_Win32_IntFlags)
-	 {
-		 return WIN_32_TRUE;
-	 }
-	 else
-	 {
-		 return WIN_32_FALSE;
-	 }
- }
+/* ISR indeces */
+#define	ISR00		((uint8_t)0)
+#define	ISR01		((uint8_t)1)
+#define	ISR02		((uint8_t)2)
+#define	ISR03		((uint8_t)3)
+#define	ISR04		((uint8_t)4)
+#define	ISR05		((uint8_t)5)
+#define	ISR06		((uint8_t)6)
+#define	ISR07		((uint8_t)7)
+#define	ISR08		((uint8_t)8)
+#define	ISR09		((uint8_t)9)
+#define	ISR10		((uint8_t)10)
+#define	ISR11		((uint8_t)11)
+#define	ISR12		((uint8_t)12)
+#define	ISR13		((uint8_t)13)
+#define	ISR14		((uint8_t)14)
+#define	ISR15		((uint8_t)15)
+#define	ISR16		((uint8_t)16)
+#define	ISR17		((uint8_t)17)
+#define	ISR18		((uint8_t)18)
+#define	ISR19		((uint8_t)19)
+#define	ISR20		((uint8_t)20)
+#define	ISR21		((uint8_t)21)
+#define	ISR22		((uint8_t)22)
+#define	ISR23		((uint8_t)23)
+#define	ISR24		((uint8_t)24)
+#define	ISR25		((uint8_t)25)
+#define	ISR26		((uint8_t)26)
+#define	ISR27		((uint8_t)27)
+#define	ISR28		((uint8_t)28)
+#define	ISR29		((uint8_t)29)
+#define	ISR30		((uint8_t)30)
+#define	ISR31		((uint8_t)31)
 
-/* get the first waiting interrupt */
-static OsEE_Win32_IntIndex_Type Win32_GetFirstISR(void)
-{
-   	OsEE_Win32_IntIndex_Type ret = 255;
-   	OsEE_Win32_IntIndex_Type interrupt;
-   	uint8_t found = 0;
-	uint8_t mask = 0;
 
-   	for(interrupt = 0; (0 == found) && (OSEE_WIN32_INTERRUPTS_NO > interrupt); interrupt++)
-   	{
-	   mask = 1 << interrupt;
-      if (OsEE_Win32_IntFlags & mask)
-      {
-         found = 1;
-         ret = interrupt;
-
-         /* reset interrupt flag */
-         OsEE_Win32_IntFlags &= ~mask;
-      }
-   }
-
-   return ret;
+/* vctor look up table */
+OsEE_Vec_type OsEE_Win32_VecLookUpTable[OSEE_WIN32_INTERRUPT_NUMBER] = {
+	{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	},
+		{
+		OsEE_Win32_DefaultHandler,
+		OSEE_ISR_CAT_1
+	}
 }
-	
-/* schedule buffered interrupts */
-extern void Win32_ScheduleBuffered_interrupt(void)
+
+/* interrupt flags typedef */
+
+typedef uint32_t OsEE_Win32_InterruptFlags_type;
+
+/* interrupt flags */
+OsEE_Win32_InterruptFlags_type  OsEE_Win32_InterruptFlags = 0x00000000;
+
+
+/* interrupt source signal is SIGALRM */
+
+/* interrupt sensing */
+static void OsEE_Win32_InterruptConttroller(int sig)
 {
-   int iterator = 0;
-   uint32 ReadyInterrupt;
-
-   if (OsEE_Win32_IntState) 
-   {
-      ReadyInterrupt = ( OsEE_Win32_IntFlagsBuffer & ( (OsEE_IntFlag_Type) ~OsEE_Win32_IntMask ) );
-      while(ReadyInterrupt != 0)
-      {
-         if (ReadyInterrupt & 1)
-         {
-            OsEE_Win32_IntFlagsBuffer &= ~(1<<iterator);
-
-            //InterruptTable[iterator](); /* to be renamed */
-         }
-
-         ReadyInterrupt >>= 1;
-         iterator++;
-      }
-   }
-}	
+	uint8_t iterrupt;
+	Handler_Addr_type interrupt_adr;
+	OSEE_ISR_CAT_type interrupt_cat;
 	
-/* start OS arch component */
-	FUNC(OsEE_bool, OS_CODE) osEE_cpu_startos(void)
-{
-  OsEE_bool const continue_startos = osEE_std_cpu_startos();
+	/* chack termination signal */
+	
+	if (OsEE_Win32_InterruptState)
+	{
+	
+		while (OsEE_Win32_InterruptFlags != 0)
+		{
+		/* identify */
+		/* check fired interrupt flag */
+			interrupt = OsEE_Win32_GetFiredInterrupt();
+		}
 
-#if (!defined(OSEE_API_DYNAMIC))
-  if (continue_startos == OSEE_TRUE) {
-/* Initialize ISRs of this core */
-	  signal(SIGALRM,OsEE_Win32_InterruptHandler);
-	  signal(SIGTERM,OsEE_Win32_InterruptHandler);
-	  signal(SIGUSR1,OsEE_Win32_InterruptHandler);
-	  /* to be implemented agter mplementing the vector table */
-      }
-    }
-#if (defined(OSEE_HAS_SYSTEM_TIMER))
-    osEE_Win32_system_timer_init();
-#endif /* OSEE_HAS_SYSTEM_TIMER */
-  }
-#endif /* !OSEE_API_DYNAMIC */
+		/* get interrupt handler */
+		interrupt_adr = OsEE_Win32_GetISRAdr(interrupt);
+
+		/* identify interrypt type */
+		interrupt_cat = OsEE_Win32_GetISRCat(interrupt);
+	
+		/* service */
+		if (OSEE_ISR_CAT_2 != interrupt_cat)
+		{
+			interrupt_adr();
+		}
+		else
+		{
+			osEE_activate_isr2(interrupt_adr);
+		}
+	}
+
+}
+
+static uint8_t OsEE_Win32_GetFiredInterrupt(void)
+{
+	uint8_t loopi;
+	
+	for(loopi = 0, loopi < OSEE_WIN32_INTERRUPT_NUMBER, loopi++)
+	{
+		if (1 == ((OsEE_Win32_InterruptFlags & (1 << loopi)) >> loopi))
+		{
+			/* reset interrupt flag */
+			OsEE_Win32_InterruptFlags &= ~(1 << loopi);
+			return loopi;
+		}
+		else
+		{
+			/* do nothing here */
+		}
+	}
+	return OSEE_WIN32_INTERRUPT_NUMBER;
+	
+}
+/* ISR address getter */
+static Handler_Addr_type OsEE_Win32_GetISRAdr(uint8_t InterruptNo)
+{
+	return OsEE_Win32_VecLookUpTable[InterruptNo].ISR_Addr;
+}
+
+/* ISR category getter */
+static OSEE_ISR_CAT_type OsEE_Win32_GetISRCat(uint8_t InterruptNo)
+{
+	return OsEE_Win32_VecLookUpTable[InterruptNo].ISR_CAT;
+}
+
+/* OS service for firing interrupts */
+void OsEE_FireInterrupt(uint8_t InterruptNo)
+{
+	OsEE_Win32_InterruptFlags |= 1 << InterruptNo;
+	kill(getpid(),SIGALRM);
+}
+
+/* ISR table setter */
+static void OsEE_Win32_SetISR(uint8_t InterruptNo,OSEE_ISR_CAT_type ISR_cat,Handler_Addr_type InterruptAdr )
+{
+	/* Assign handler address */
+	OsEE_Win32_VecLookUpTable[InterruptNo].ISR_Addr = InterruptAdr;
+	
+	/* assighn ISR category */
+	OsEE_Win32_VecLookUpTable[InterruptNo].ISR_CAT  = ISR_cat;
+}
+
+/* To be used by user */
+void OsEE_SetInterruptHandler(uint8_t InterruptNo, Handler_Addr_type InterruptAdr)
+{
+	/* assign ISR category 1 */
+	OsEE_Win32_SetISR(InterruptNo, OSEE_ISR_CAT_1,InterruptAdr);
+}
+
+
+FUNC(OsEE_bool, OS_CODE) osEE_cpu_startos(void)
+{
+	OsEE_bool const continue_startos = osEE_std_cpu_startos();
+	OsEE_KDB * const ptr_to_KDB      = osEE_get_kernel();
+	OsEE_TDB * ptr_to_TDB;		 
+
+	/* Initialize ISRs of the kernel  */
+
+	for (i = 0U; i < (ptr_to_KDB->tdb_array_size - 1U); ++i) 
+	{
+	  /* ISR2 initialization */
+	  ptr_to_TDB = (*ptr_to_KDB->p_tdb_ptr_array)[i];
+
+	  if (ptr_to_TDB->task_type == OSEE_TASK_TYPE_ISR2) 
+	  {
+		OsEE_Win32_SetISR(ptr_to_TDB->hdb.isr2_src, INT_CAT_ISR2, ptr_to_TDB->task_func);
+	  }
+	}
+
+	osEE_Win32_system_timer_init();
+  
   return continue_startos;
 }
