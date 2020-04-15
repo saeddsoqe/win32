@@ -57,11 +57,12 @@
 
 .macro osEE_hal_save_ctx_m p_from_scb
 
-    pushf /* This decrements rsp by 8 */
-    push    %r15
-    push    %r14
-    push    %r13
-    push    %r12
+/*    pushf /* This decrements rsp by 8 */
+/*    push    %r15 */
+/*    push    %r14 */
+/*    push    %r13 */
+/*    push    %r12 */
+    
     push    %rbp
     push    %rbx
 
@@ -81,11 +82,11 @@
 
     pop %rbx
     pop %rbp
-    pop %r12
-    pop %r13
-    pop %r14
-    pop %r15
-    popf
+/*    pop %r12 */
+/*    pop %r13 */
+/*    pop %r14 */
+/*    pop %r15 */
+/*    popf     */
 .endm
 
 /*
