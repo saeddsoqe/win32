@@ -79,6 +79,15 @@ typedef enum
 	WIN_32_TRUE
 }OsEE_Win32_Bool;
 
+
+typedef struct {
+  uintptr_t isr_hnd;
+  uint8_t   category;
+} OsEE_x86_64_lookup_table;
+
+static OsEE_x86_64_lookup_table osEE_isr_task_lookup_table[NUM_IDT_DESC];
+
+
 void OsEE_Win32_InterruptHandler(int sig)
 {
 	OsEE_Win32_IntIndex_Type interrupt;
