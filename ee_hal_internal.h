@@ -73,38 +73,21 @@ extern "C" {
 /*==============================================================================
                                   Macros
  =============================================================================*/
-  
-#define OSEE_WIN32_INTERRUPTS_NO	32
 /*==============================================================================
-                                  Typedefs
+							external data interface
  =============================================================================*/
-/* interrupt inital flag */
-typedef uint32_t OsEE_IntFlag_Type;
-  /* interrupt status */
-typedef unsigned char OsEE_IntState_Type;
-  /* interrupt index type */
-typedef unsigned char OsEE_Win32_IntIndex_Type;
-  typedef enum
-{
-	WIN_32_FLSE,
-	WIN_32_TRUE
-}OsEE_Win32_Bool;
-  
-/*==============================================================================
-                                  External data
- =============================================================================*/
-extern OsEE_IntFlag_Type OsEE_Win32_IntFlags;
+/* interrupt flags */ // to be externed in hal internal
+extern OsEE_Win32_InterruptFlags_type  OsEE_Win32_InterruptFlags;
 
-/* interrupt interrupt flags buffer */
-extern OsEE_IntFlag_Type OsEE_Win32_IntFlagsBuffer;
+/* interrupt state */ // to be externed in hal internal
+extern OsEE_bool OsEE_Win32_InterruptState;
 
-
-extern OsEE_IntState_Type OsEE_Win32_IntState;
-
-/* interrupt mask type */
-extern OsEE_IntFlag_Type OsEE_Win32_IntMask;
-
-
+/*
+typedef enum {
+  OSEE_FALSE = OSEE_M_FALSE,
+  OSEE_TRUE  = OSEE_M_TRUE
+} OsEE_bool;
+*/
 
 /*==============================================================================
                         Interrupt handling utilities
@@ -112,44 +95,45 @@ extern OsEE_IntFlag_Type OsEE_Win32_IntMask;
 
 OSEE_STATIC_INLINE OsEE_bool osEE_hal_is_enabledIRQ( void )
 {
-  return OsEE_Win32_IntState;
+  return (OsEE_Win32_InterruptState);
 }
 
 /* Disable/Enable Interrupts */
 OSEE_STATIC_INLINE void osEE_hal_disableIRQ( void )
 {
-  OsEE_Win32_IntState = (0U);
+  OsEE_Win32_InterruptState = OSEE_M_FALSE;
 }
 
 OSEE_STATIC_INLINE void osEE_hal_enableIRQ( void )
 {
-  OsEE_Win32_IntState = (1U);
-  Win32_ScheduleBuffered_interrupt
+  OsEE_Win32_InterruptState = OSEE_M_TRUE;
+  OsEE_Win32_HandleSuspendedInterrupts();
 }
 
 /* Suspend/Resume Interrupts */
 OSEE_STATIC_INLINE OsEE_reg osEE_hal_suspendIRQ(void)
 {
   osEE_hal_disableIRQ();
-  return OsEE_Win32_IntFlagsBuffer;
+  return OsEE_Win32_InterruptFlags;
 }
 
 OSEE_STATIC_INLINE void osEE_hal_resumeIRQ(OsEE_reg flags)
 {
-  osEE_hal_enableIRQ();
+	OsEE_Win32_InterruptFlags = flags;
+	/* handle suspended */
+	osEE_hal_enableIRQ();
 }
 
 OSEE_STATIC_INLINE void osEE_hal_set_ipl(TaskPrio virt_prio) {
-  //(void)virt_prio; /* IPL not supported, yet */
-  __asm__ volatile("nop");
+  (void)virt_prio; /* IPL not supported, yet */
 }
 
 OSEE_STATIC_INLINE OsEE_reg
   osEE_hal_prepare_ipl(OsEE_reg flags, TaskPrio virt_prio)
 {
   /* IPL not supported, yet */
-  //(void)virt_prio;
-  return OsEE_Win32_IntFlagsBuffer;
+  (void)virt_prio;
+  return flags;
 }
 
 /*==============================================================================
@@ -170,7 +154,6 @@ OSEE_STATIC_INLINE void osEE_hal_end_nested_primitive( OsEE_reg flag )
   osEE_hal_resumeIRQ(flag);
 }
 
-  extern void Win32_ScheduleBuffered_interrupt(void);
 /*==============================================================================
                           Ready Queue utilities
  =============================================================================*/
@@ -198,8 +181,7 @@ OSEE_STATIC_INLINE MemSize osEE_hal_get_msb (OsEE_rq_mask mask) {
 #if (defined(OSEE_HAS_SYSTEM_TIMER))
 extern void osEE_Win32_system_timer_init(void);
 #endif /* OSEE_HAS_SYSTEM_TIMER */
-  
-/* to be modified after understanding the tcb */
+
 OSEE_STATIC_INLINE FUNC(void, OS_CODE)
   osEE_change_context_from_isr2_end
 (
