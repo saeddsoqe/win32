@@ -76,21 +76,12 @@ typedef enum {
 #define OSEE_BOOL_TYPE OsEE_bool
 #endif /* !OSEE_BOOL_TYPE */
 
-/*====================[modified from 64 to 32]======================*/
-/* If INTMAX_MIN is not defined means the stdint.h is not included */
-#if (!defined(INTMAX_MIN))
-typedef unsigned char         uint8_t;
-typedef unsigned short int    uint16_t;
-typedef unsigned int          uint32_t;
-typedef unsigned long int     uint64_t;
-typedef long int              int32_t;
-#endif /* !INTMAX_MIN */
-/* Define HAL types */
+/* Define HAL types */ // to be modified
 typedef void *                OsEE_addr;
 typedef int32_t               OsEE_sreg;
 typedef uint32_t              OsEE_reg;
 typedef uint32_t              OsEE_stack;
-/*===================================================================*/
+
 typedef uint8_t               OsEE_core_id;
 #define OSEE_CORE_ID_TYPE     OsEE_core_id
 
@@ -98,6 +89,49 @@ typedef uint8_t               OsEE_isr_src_id;
 #define OSEE_ISR_SOURCE_TYPE  OsEE_isr_src_id
 
 typedef void (* OsEE_void_cb) ( void );
+
+typedef unsigned long           OsEE_vaddr;
+/************************ win32 added *************************/
+/* pointer to void-void func */
+typedef void (*Handler_Addr_type) (void);
+
+/* interrupt flags type */
+typedef uint32_t OsEE_Win32_InterruptFlags_type;
+
+/* ISR indeces */ 
+#define	ISR00		((uint8_t)0)
+#define	ISR01		((uint8_t)1)
+#define	ISR02		((uint8_t)2)
+#define	ISR03		((uint8_t)3)
+#define	ISR04		((uint8_t)4)
+#define	ISR05		((uint8_t)5)
+#define	ISR06		((uint8_t)6)
+#define	ISR07		((uint8_t)7)
+#define	ISR08		((uint8_t)8)
+#define	ISR09		((uint8_t)9)
+#define	ISR10		((uint8_t)10)
+#define	ISR11		((uint8_t)11)
+#define	ISR12		((uint8_t)12)
+#define	ISR13		((uint8_t)13)
+#define	ISR14		((uint8_t)14)
+#define	ISR15		((uint8_t)15)
+#define	ISR16		((uint8_t)16)
+#define	ISR17		((uint8_t)17)
+#define	ISR18		((uint8_t)18)
+#define	ISR19		((uint8_t)19)
+#define	ISR20		((uint8_t)20)
+#define	ISR21		((uint8_t)21)
+#define	ISR22		((uint8_t)22)
+#define	ISR23		((uint8_t)23)
+#define	ISR24		((uint8_t)24)
+#define	ISR25		((uint8_t)25)
+#define	ISR26		((uint8_t)26)
+#define	ISR27		((uint8_t)27)
+#define	ISR28		((uint8_t)28)
+#define	ISR29		((uint8_t)29)
+#define	ISR30		((uint8_t)30)
+#define	ISR31		((uint8_t)31)
+
 
 //typedef uint8_t               OsEE_isr_prio;
 //#define OSEE_ISR_PRIO_TYPE    OsEE_isr_prio
@@ -110,5 +144,4 @@ typedef void (* OsEE_void_cb) ( void );
 }
 #endif
 
-typedef unsigned long           OsEE_vaddr;
 #endif /* !OSEE_PLATFORM_TYPES_H */
