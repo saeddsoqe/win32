@@ -158,4 +158,11 @@ void* osEE_x86_64_system_timer_thread(void *pThread_Arg)
    }
    return NULL;
 }
+void osEE_Win32_system_timer_handler(void)
+{
+  OsEE_CDB * p_cdb;
+  
+  p_cdb = osEE_get_curr_core();
+  osEE_counter_increment(p_cdb->p_sys_counter_db);
+}
 
