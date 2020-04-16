@@ -113,7 +113,7 @@ pthread_t   TimerThread;
 extern void osEE_Win32_system_timer_init(void)
 {
   int rt_error;
-  rt_error = pthread_create(&TimerThread, NULL,osEE_x86_64_system_timer_thread, NULL);
+  rt_error = pthread_create(&TimerThread, NULL,osEE_Win32_system_timer_thread, NULL);
   
   if(rt_error!=0)
   {
@@ -127,7 +127,7 @@ extern void osEE_Win32_system_timer_init(void)
   
 } 
 
-void* osEE_x86_64_system_timer_thread(void *pThread_Arg)
+void* osEE_Win32_system_timer_thread(void *pThread_Arg)
 {
    struct timespec rqtp;
    uint8 interrupt;
