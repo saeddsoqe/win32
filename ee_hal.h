@@ -89,25 +89,6 @@ extern "C" {
 #define OSEE_GLOBAL_LABEL(label)  __asm__(".globl " #label "\n" #label ":")
 #endif /* 0 */
 
-OSEE_STATIC_INLINE OsEE_reg osEE_x86_64_read_msr(unsigned int msr)
-{
-  uint32_t low, high;
-  __asm__ volatile("rdmsr" : "=a" (low), "=d" (high) : "c" (msr));
-  return ((OsEE_reg)high << 32U) | low;
-}
-
-OSEE_STATIC_INLINE void osEE_x86_64_write_msr(unsigned int msr, uint64_t val)
-{
-  __asm__ volatile("wrmsr"
-    : /* no output */
-    : "c" (msr), "a" ((uint32_t)val), "d" ((uint32_t)(val >> 32))
-    : "memory");
-}
-
-OSEE_STATIC_INLINE void osEE_cpu_relax(void) {
-  __asm__ volatile("rep; nop" : : : "memory");
-}
-
 /* Context handling functions for Tasking */
 OSEE_STATIC_INLINE OsEE_addr osEE_get_SP(void)
 {
@@ -122,17 +103,9 @@ OSEE_STATIC_INLINE OsEE_addr osEE_get_SP(void)
  =============================================================================*/
 /* XXX: Maybe I need a global data structures like {KDB,KCB} for the HAL
         architecture dependent? */
-extern OsEE_core_id osEE_x86_64_core_id_offset;
-
-/* Defined according to the managed PIC (APIC, x2APIC, ..) */
-OsEE_core_id osEE_x86_64_get_local_apic_id(void);
-
-OSEE_STATIC_INLINE OsEE_core_id osEE_x86_64_get_core_id_raw(void) {
-       return osEE_x86_64_get_local_apic_id();
-}
 
 OSEE_STATIC_INLINE OsEE_core_id osEE_get_curr_core_id(void) {
-  return  osEE_x86_64_get_core_id_raw() - osEE_x86_64_core_id_offset;
+  return 0U;
 }
 
 /*==============================================================================
@@ -143,63 +116,19 @@ void osEE_x86_64_calibrate_platform_tick_freq(void);
 /*==============================================================================
                             Interrupt management
  =============================================================================*/
-void osEE_x86_64_int_init(void); /*Initialize idt */
-void set_interrupt_handler(uint32_t source_id, OsEE_void_cb callback);
+void OsEE_SetInterruptHandler(uint8_t source_id, Handler_Addr_type InterruptAdr);
 
-/* Initialize the interrupt controller (APIC, X2APIC, ...)*/
-int osEE_x86_64_int_controller_init(void);
-
-void call_int(unsigned int source_id);
-/**
- * \def OSEE_CALL_INT(int_id)
- * Call the interrupt \int_id
- * \warning int_id must be an immediate
- */
-#define OSEE_CALL_INT(int_id) __asm__ volatile("int %0" : : "n"(int_id));
-void osEE_x86_64_int_send_ipi(unsigned int cpu_id, unsigned int vector);
-
-/* Send ACK for the end of interrupt */
-void osEE_x86_64_int_send_eoi(void);
 
 /*==============================================================================
                             I/O management
  =============================================================================*/
-void osEE_x86_64_ioapic_init(void);
-
-void osEE_x86_64_ioapic_setup_irq(unsigned int pin, unsigned int vector);
-
-
-enum ee_ioapic_delivery_mode {
-	FIXED = 0, //!< deliver on the INTR signal of all destination processors
-	LOWEST_PRIORITY, //!< deliver to lowest-priority destination CPU
-	SMI, //!< system management interrupt (vector ignored)
-	NMI = 4, //!< non-maskable interrupt (vector ignored)
-	INIT, //!< perform INIT at destination processors (vector ignored)
-	EXTINT = 7 //!< deliver as an external (PIC) interrupt on all destination processors
-};
-
-void osEE_x86_64_ioapic_setup_irq_extended(OsEE_core_id core_id,
-					   unsigned int pin,
-					   unsigned int vector,
-					   enum ee_ioapic_delivery_mode delmode,
-					   unsigned int active_low);
 
 
 /*==============================================================================
                                  Timer Support
  =============================================================================*/
-/* Calibrate the timer tick frequency */
-extern void osEE_x86_64_set_timer_tick_freq(uint64_t tick_freq_hz);
-/* Initialize the one-shot timer with the interrupt source */
-extern void osEE_x86_64_oneshot_timer_init(unsigned int vector);
-/* Set the deadline for the timer */
-extern void osEE_x86_64_timer_set_deadline(uint64_t timeout_ns);
-
-/* Type of supported system timer (corresponds to system timer interrupt id) */
-#define OSEE_X86_64_APIC_TIMER    32
-
 #if (defined(OSEE_HAS_SYSTEM_TIMER))
-extern void osEE_x86_64_system_timer_handler(void);
+extern void osEE_Win32_system_timer_handler(void);
 #endif /* OSEE_HAS_SYSTEM_TIMER */
 
 /*=============================================================================
