@@ -160,7 +160,8 @@ OSEE_LINKER_SCRIPT ?= $(OS_EE_MK_BASE_DIR)/ee_x86_64_linker.lds
 
 # OPT_LINK represents the options for avr linker invocation
 #OPT_LINK += -Wl,-Map=$(TARGET_NAME).map -Os -Wl,--gc-sections -Wl,-zmax-page-size=0x1000 -Wl,--build-id=none -static -nostdlib -T $(OSEE_LINKER_SCRIPT)
-OPT_LINK += -Wl,-Map=$(TARGET_NAME).map -Os -Wl,--gc-sections -Wl,-n -Wl,--build-id=none -static -nostartfiles -T $(OSEE_LINKER_SCRIPT)
+#modified linker part is removed and -no-pie ,--no-dynamic-linker are added
+OPT_LINK += -Wl,-Map=$(TARGET_NAME).map -Os -Wl,--gc-sections -Wl,-n -no-pie -Wl,--build-id=none -static -nostartfiles,--no-dynamic-linker 
 ifeq	($(call iseeopt, OS_EE_VERBOSE), yes)
 OPT_LINK += -Wl,--verbose
 endif
@@ -203,10 +204,12 @@ LIBDEP += $(OS_EE_LIB_BASE_DIR)/lib$(EELIB).a
 endif	# OS_EE_BUILD
 
 # Define the TARGET
-TARGET_NAME ?= erika
+#modfied replaced erika by erika_Win32
+TARGET_NAME ?= erika_Win32
 
 # Add application file to dependencies
 ifneq ($(call iseeopt, OS_EE_BUILD), yes)
-export APP_TARGETS := 	$(TARGET_NAME).bin $(TARGET_NAME).dump
+#modified replaced (TARGET_NAME).bin by (TARGET_NAME).exe
+export APP_TARGETS := 	$(TARGET_NAME).exe $(TARGET_NAME).dump
 $(info APP_TARGETS=$(APP_TARGETS))
 endif	# !OS_EE_BUILD
