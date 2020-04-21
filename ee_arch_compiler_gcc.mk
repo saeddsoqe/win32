@@ -68,8 +68,8 @@ BINDIR :=
 #ALLINCPATH += \
 #$(foreach d,$(INCLUDE_PATH),$(addprefix -I,$(call native_path,$d)))
 
-
-X86_64_GCCPREFIX ?= x86_64-unknown-elf-
+#modified x86_64-unknown-elf- removed 
+Win32_GCCPREFIX ?= 
 
 #@JAILHOUSE_SYSTEM_HEADERS ?= $(shell $(X86_64_GCCPREFIX)gcc -print-file-name=include) # /usr/lib/gcc/aarch64-linux-gnu/5/include
 
@@ -79,30 +79,32 @@ X86_64_GCCPREFIX ?= x86_64-unknown-elf-
 ALLINCPATH += $(foreach d,$(INCLUDE_PATH),$(addprefix -I,$d))
 
 
-EE_OBJDUMP ?= $(BINDIR)$(X86_64_GCCPREFIX)objdump
+EE_OBJDUMP ?= $(BINDIR)$(Win32_GCCPREFIX)objdump
 
 # GNUPro compilers
-EE_LINK ?= $(BINDIR)$(X86_64_GCCPREFIX)gcc
+EE_LINK ?= $(BINDIR)$(Win32_GCCPREFIX)gcc
 
-OS_EE_AS ?= $(BINDIR)$(X86_64_GCCPREFIX)gcc
+OS_EE_AS ?= $(BINDIR)$(Win32_GCCPREFIX)gcc
 
-EE_CC ?= $(BINDIR)$(X86_64_GCCPREFIX)gcc
+EE_CC ?= $(BINDIR)$(Win32_GCCPREFIX)gcc
 
-EE_CXX ?= $(BINDIR)$(X86_64_GCCPREFIX)g++
+EE_CXX ?= $(BINDIR)$(Win32_GCCPREFIX)g++
 
-OS_EE_AR ?= $(BINDIR)$(X86_64_GCCPREFIX)ar
+OS_EE_AR ?= $(BINDIR)$(Win32_GCCPREFIX)ar
 
-EE_NM ?= $(BINDIR)$(X86_64_GCCPREFIX)nm
+EE_NM ?= $(BINDIR)$(Win32_GCCPREFIX)nm
 
-EE_OBJCOPY ?= $(BINDIR)$(X86_64_GCCPREFIX)objcopy
+EE_OBJCOPY ?= $(BINDIR)$(Win32_GCCPREFIX)objcopy
 
-EE_SIZE ?= $(BINDIR)$(X86_64_GCCPREFIX)size
+EE_SIZE ?= $(BINDIR)$(Win32_GCCPREFIX)size
 
 ## OPT_CC are the options for X86_64 C compiler invocation
-# removed: -nostdinc -Werror, added -mno-red-zone
-OPT_CC += -c -m64 -fno-pie -Wall -Wstrict-prototypes -mno-red-zone             \
+# removed: -nostdinc -Werror, added -mno-red-zone 
+#modified m64 to m32
+OPT_CC += -c -m32 -fno-pie -Wall -Wstrict-prototypes -mno-red-zone             \
 -Wtype-limits -Wmissing-declarations -Wmissing-prototypes -fno-strict-aliasing \
 -fno-pic -fno-common -fno-stack-protector
+
 
 
 ifeq ($(or	\
@@ -118,9 +120,9 @@ endif
 OPT_CC += $(CFLAGS)
 
 ## OPT_CXX are the options for X86_64 C++ compiler invocation
-# removed: -nostdinc -Werror -Wstrict-prototypes -Wmissing-prototypes,
+# removed: -nostdinc -Werror -Wstrict-prototypes -Wmissing-prototypes,m64
 # added -mno-red-zone -fno-exceptions
-OPT_CXX += -c -m64 -fno-pie -Wall -mno-red-zone    \
+OPT_CXX += -c -m32 -fno-pie -Wall -mno-red-zone    \
 -Wtype-limits -Wmissing-declarations -fno-strict-aliasing \
 -fno-pic -fno-common -fno-stack-protector -fno-exceptions
 ifeq ($(or	\
@@ -135,7 +137,8 @@ endif
 OPT_CXX += $(CFLAGS) $(CXXFLAGS)
 
 ## OS_EE_AS_OPT are the options for X86_64 assembler invocation
-OS_EE_AS_OPT = -c -m64 -Werror -nostdinc -fno-pie -Wall -Wstrict-prototypes    \
+#modified m64 replaced by m32
+OS_EE_AS_OPT = -c -m32 -Werror -nostdinc -fno-pie -Wall -Wstrict-prototypes    \
 -Wtype-limits -Wmissing-declarations -Wmissing-prototypes -fno-strict-aliasing \
 -fno-pic -fno-common -fno-stack-protector -mno-red-zone
 ifeq ($(or	\
@@ -154,8 +157,8 @@ OS_EE_AR_OPT = $(subst $(OS_EE_SPACE),,csv $(subst v,,$(ARFLAGS)))
 else	# OS_EE_VERBOSE
 OS_EE_AR_OPT = $(subst v,,$(subst $(OS_EE_SPACE),,cs $(ARFLAGS)))
 endif	# OS_EE_VERBOSE
-
-OSEE_LINKER_SCRIPT ?= $(OS_EE_MK_BASE_DIR)/ee_x86_64_linker.lds
+#removed we don't have linker 
+#OSEE_LINKER_SCRIPT ?= $(OS_EE_MK_BASE_DIR)/ee_x86_64_linker.lds
 
 
 # OPT_LINK represents the options for avr linker invocation
