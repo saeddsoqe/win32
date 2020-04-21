@@ -109,9 +109,13 @@ $(TARGET_NAME).elf: $(OBJS) $(LIBDEP)
 ##
 ## BIN file creation
 ##
-
-$(TARGET_NAME).bin: $(TARGET_NAME).elf
-	$(EE_OBJCOPY) -O binary $< $@
+#modified replace .bin by .exe 
+#$(TARGET_NAME).bin: $(TARGET_NAME).elf
+#	$(EE_OBJCOPY) -O binary $< $@
+$(TARGET_NAME).exe:$(OBJS) $(LIBDEP)
+	$(VERBOSE_PRINTLD) $(EE_LINK) $(COMPUTED_OPT_LINK) $(OBJS) \
+	-o $(TARGETFILE) $(OPT_LIBS)
+	$(QUIET)$(EE_SIZE) $(TARGETFILE)
 
 $(TARGET_NAME).dump: $(TARGET_NAME).elf
 	$(EE_OBJDUMP) -C -t -x -S $< > $@
