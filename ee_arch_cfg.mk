@@ -82,4 +82,4 @@ EE_SRCS += ee_Win32_system_timer.c
 #EE_SRCS += intel_i210.c
 #endif
 
-endif	# OSEE_ARCH_X86_64
+endif	# OSEE_ARCH_Win32
