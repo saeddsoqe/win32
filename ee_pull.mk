@@ -53,7 +53,7 @@
 ##This function hides the internal representations of EEOPTs, and can be used in conditionals and in OR/AND expressions
 #.........................................................................#
 #check the info from oil file 
-ifeq ($(call iseeopt, OSEE_ARCH_X86_64), yes)
+ifeq ($(call iseeopt, OSEE_ARCH_Win32), yes)
 #remove both platform bare & jailhouse 
 #ifeq  ($(call iseeopt, OSEE_PLATFORM_JAILHOUSE), yes)
 #OSEE_PLATFORM := jailhouse
@@ -135,9 +135,9 @@ OS_EE_PULL_SRC_FILES += $(ERIKA_FILES)/pkg/arch/win32/ee_Win32_system_timer.c
 
 #we will discuss 
 #i think this section like the board section in makefile in openosek
-ifneq ($(OSEE_X86_64_BOARD),)
-OS_EE_PULL_INC_FILES += $(ERIKA_FILES)/pkg/arch/x86-64/$(OSEE_X86_64_BOARD)/ee_board.h
-endif # OSEE_X86_64_BOARD
+#ifneq  ($(OSEE_X86_64_BOARD),)
+#OS_EE_PULL_INC_FILES += $(ERIKA_FILES)/pkg/arch/x86-64/$(OSEE_X86_64_BOARD)/ee_board.h
+#endif # OSEE_X86_64_BOARD
 
 #OS_EE_PULL_INC_FILES += $(ERIKA_FILES)/pkg/arch/x86-64/ee_x86_64_tsc.h
 #OS_EE_PULL_INC_FILES += $(ERIKA_FILES)/pkg/arch/x86-64/ee_x86_64_tsc_internal.h
@@ -173,4 +173,4 @@ endif # OSEE_X86_64_BOARD
 #OS_EE_PULL_SRC_FILES += $(ERIKA_FILES)/pkg/arch/x86-64/intel_i210/intel_i210.c
 #endif
 
-endif # OSEE_ARCH_X86_64
+endif # OSEE_ARCH_Win32
