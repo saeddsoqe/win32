@@ -47,38 +47,39 @@
 ## \author	Ida Savino
 ## \date	2018
 
-ifeq	($(call iseeopt, OSEE_ARCH_X86_64), yes)
+ifeq	($(call iseeopt, OSEE_ARCH_Win32), yes)
 
-EE_SRCS += ee_x86_64_startup.S
-EE_SRCS += ee_x86_64_boot.c
-EE_SRCS += ee_x86_64_ctx.S
-EE_SRCS += ee_x86_64_libc_syscall.c
+#EE_SRCS += ee_x86_64_startup.S
+#EE_SRCS += ee_x86_64_boot.c
+#modified and replaced by our folder 
+EE_SRCS += ee_Win32_ctx.S
+#EE_SRCS += ee_x86_64_libc_syscall.c
 
-EE_SRCS += ee_x86_64_memory_mgmt.c
+#EE_SRCS += ee_x86_64_memory_mgmt.c
 
-EE_SRCS += ee_x86_64_int.c
-ifeq ($(call iseeopt,  OSEE_PLATFORM_X86_64_INT_CONTROLLER_APIC), yes)
-EE_SRCS += ee_x86_64_apic.c
-endif
-ifeq ($(call iseeopt,  OSEE_PLATFORM_X86_64_INT_CONTROLLER_X2APIC), yes)
-EE_SRCS += ee_x86_64_x2apic.c
-endif
-EE_SRCS += ee_x86_64_tsc.c
-EE_SRCS += ee_x86_64_time_setup.c
-EE_SRCS += ee_x86_64_ioapic.c
+EE_SRCS += ee_Win32_int.c
+#ifeq  ($(call iseeopt,  OSEE_PLATFORM_X86_64_INT_CONTROLLER_APIC), yes)
+#EE_SRCS += ee_x86_64_apic.c
+#endif
+#ifeq  ($(call iseeopt,  OSEE_PLATFORM_X86_64_INT_CONTROLLER_X2APIC), yes)
+#EE_SRCS += ee_x86_64_x2apic.c
+#endif
+#EE_SRCS += ee_x86_64_tsc.c
+#EE_SRCS += ee_x86_64_time_setup.c
+#EE_SRCS += ee_x86_64_ioapic.c
 
-EE_SRCS += src/ee_uart.c
-EE_SRCS += src/ee_pci.c
-ifeq ($(call iseeopt, OSEE_API_DYNAMIC), yes)
-	EE_SRCS += ee_std_hal_init.c
-endif # OSEE_DYNAMIC_API
+#EE_SRCS += src/ee_uart.c
+#EE_SRCS += src/ee_pci.c
+#ifeq  ($(call iseeopt, OSEE_API_DYNAMIC), yes)
+#	EE_SRCS += ee_std_hal_init.c
+#endif # OSEE_DYNAMIC_API
 
-ifeq ($(call iseeopt, OSEE_HAS_SYSTEM_TIMER), yes)
-EE_SRCS += ee_x86_64_system_timer.c
-endif # OSEE_DYNAMIC_API
+#ifeq  ($(call iseeopt, OSEE_HAS_SYSTEM_TIMER), yes)
+EE_SRCS += ee_Win32_system_timer.c
+#endif # OSEE_DYNAMIC_API
 
-ifeq ($(call iseeopt, OSEE_PLATFORM_X86_64_ENABLE_INTEL_I210_DRIVER), yes)
-EE_SRCS += intel_i210.c
-endif
+#ifeq  ($(call iseeopt, OSEE_PLATFORM_X86_64_ENABLE_INTEL_I210_DRIVER), yes)
+#EE_SRCS += intel_i210.c
+#endif
 
 endif	# OSEE_ARCH_X86_64
