@@ -122,7 +122,7 @@ OPT_CC += $(CFLAGS)
 ## OPT_CXX are the options for X86_64 C++ compiler invocation
 # removed: -nostdinc -Werror -Wstrict-prototypes -Wmissing-prototypes,m64
 # added -mno-red-zone -fno-exceptions
-OPT_CXX += -c -m32 -fno-pie -Wall -mno-red-zone    \
+OPT_CXX += -c -m64 -fno-pie -Wall -mno-red-zone    \
 -Wtype-limits -Wmissing-declarations -fno-strict-aliasing \
 -fno-pic -fno-common -fno-stack-protector -fno-exceptions
 ifeq ($(or	\
@@ -138,7 +138,7 @@ OPT_CXX += $(CFLAGS) $(CXXFLAGS)
 
 ## OS_EE_AS_OPT are the options for X86_64 assembler invocation
 #modified m64 replaced by m32
-OS_EE_AS_OPT = -c -m32 -Werror -nostdinc -fno-pie -Wall -Wstrict-prototypes    \
+OS_EE_AS_OPT = -c -m64 -Werror -nostdinc -fno-pie -Wall -Wstrict-prototypes    \
 -Wtype-limits -Wmissing-declarations -Wmissing-prototypes -fno-strict-aliasing \
 -fno-pic -fno-common -fno-stack-protector -mno-red-zone
 ifeq ($(or	\
